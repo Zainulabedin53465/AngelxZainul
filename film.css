@@ -1,0 +1,283 @@
+/* =========================================================
+   film.css : the 12 cinematic chapters
+   Loaded AFTER style.css so it wins.
+   Tune here:  --film-length = scroll length of ONE chapter
+               (bigger = slower, 320vh is roughly India's pace)
+   ========================================================= */
+:root {
+  --stage-h: 100vh;
+  --film-length: 320vh;
+  --film-gold: #c9a45c;
+
+  /* silhouette shapes (clip-path polygons) */
+  --none: polygon(0 100%, 0 100%, 0 100%);
+  --hills: polygon(0 100%, 0 62%, 10% 50%, 22% 58%, 36% 38%, 50% 54%, 63% 34%, 78% 52%, 90% 42%, 100% 50%, 100% 100%);
+  --ground: polygon(0 100%, 0 64%, 18% 56%, 40% 63%, 62% 52%, 82% 60%, 100% 54%, 100% 100%);
+  --waves: polygon(0 100%, 0 40%, 8% 30%, 16% 42%, 24% 30%, 32% 42%, 40% 30%, 48% 42%, 56% 30%, 64% 42%, 72% 30%, 80% 42%, 88% 30%, 96% 42%, 100% 36%, 100% 100%);
+  --skyline: polygon(0 100%, 0 58%, 5% 58%, 5% 36%, 11% 36%, 11% 62%, 17% 62%, 17% 24%, 23% 24%, 23% 50%, 29% 50%, 29% 40%, 36% 40%, 36% 66%, 43% 66%, 43% 30%, 49% 30%, 49% 56%, 57% 56%, 57% 18%, 63% 18%, 63% 48%, 71% 48%, 71% 38%, 78% 38%, 78% 62%, 85% 62%, 85% 28%, 92% 28%, 92% 52%, 100% 52%, 100% 100%);
+  --houses: polygon(0 100%, 0 70%, 6% 70%, 10% 52%, 14% 70%, 22% 70%, 22% 62%, 32% 62%, 36% 44%, 40% 62%, 46% 62%, 46% 70%, 58% 70%, 62% 50%, 66% 70%, 76% 70%, 76% 60%, 86% 60%, 90% 42%, 94% 60%, 100% 60%, 100% 100%);
+  --towers: polygon(0 100%, 0 70%, 8% 70%, 11% 28%, 14% 70%, 30% 70%, 30% 55%, 36% 55%, 36% 70%, 52% 70%, 56% 8%, 60% 70%, 76% 70%, 76% 55%, 82% 55%, 82% 70%, 90% 70%, 93% 28%, 96% 70%, 100% 70%, 100% 100%);
+
+  --stars:
+    radial-gradient(1.5px 1.5px at 8% 12%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 18% 30%, #fff, transparent 60%),
+    radial-gradient(1.5px 1.5px at 27% 8%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 38% 22%, #fff, transparent 60%),
+    radial-gradient(1.5px 1.5px at 47% 14%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 58% 34%, #fff, transparent 60%),
+    radial-gradient(1.5px 1.5px at 66% 10%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 76% 26%, #fff, transparent 60%),
+    radial-gradient(1.5px 1.5px at 85% 16%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 93% 32%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 13% 44%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 72% 46%, #fff, transparent 60%);
+}
+@supports (height: 100svh) { :root { --stage-h: 100svh; } }
+@media (max-width: 700px)  { :root { --film-length: 260vh; } }
+
+/* ---------- runway + pinned stage (same pattern as India / PH) ---------- */
+#story .film-layer {
+  position: relative;
+  display: block;
+  height: var(--film-length);
+  min-height: 0;
+  /* overlap by one screen so there is no dead black scroll between chapters */
+  margin: calc(var(--stage-h) * -1) 0 0;
+  padding: 0;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  background: transparent;
+  overflow: visible;
+  pointer-events: none;
+}
+#story .film-stage {
+  position: sticky;
+  top: 0;
+  height: var(--stage-h);
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(to bottom, var(--sky-top, #05060c), var(--sky-bot, #151a2e));
+}
+/* JS arms the layer; only the active chapter is painted */
+#story .film-layer.is-armed .film-stage { visibility: hidden; }
+#story .film-layer.is-armed.is-on .film-stage { visibility: visible; }
+
+/* ---------- the three depth planes ---------- */
+#story .film-depth { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+#story .film-depth > div {
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  bottom: 0;
+  height: 100%;
+  will-change: transform;
+}
+#story .film-depth > div::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: var(--h);
+  background: var(--c);
+  clip-path: var(--shape);
+}
+#story .film-depth__far  { --c: var(--far-c,  #1a2038); --shape: var(--shape-far,  var(--hills));  --h: 56%; }
+#story .film-depth__mid  { --c: var(--mid-c,  #10142a); --shape: var(--shape-mid,  var(--skyline)); --h: 44%; }
+#story .film-depth__near { --c: var(--near-c, #05060c); --shape: var(--shape-near, var(--ground));  --h: 26%; }
+
+/* ---------- text ---------- */
+#story .film-content {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 6vw;
+}
+#story .film-content span {
+  display: block;
+  margin: 0 0 1.6rem;
+  font: 500 0.78rem/1 'Inter', sans-serif;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--film-gold);
+}
+#story .film-content h2 {
+  margin: 0 0 1.4rem;
+  font: 300 clamp(2.6rem, 7.5vw, 6.5rem)/1.04 'Cormorant Garamond', serif;
+  letter-spacing: 0.01em;
+  color: #f6efe4;
+  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.45);
+}
+#story .film-content p {
+  margin: 0;
+  max-width: 36ch;
+  font: 300 clamp(1rem, 1.6vw, 1.3rem)/1.6 'Inter', sans-serif;
+  color: rgba(246, 239, 228, 0.82);
+  text-shadow: 0 1px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- special elements already in your HTML ---------- */
+#story .film-orb {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 26%;
+  width: min(38vw, 420px);
+  aspect-ratio: 1;
+  margin-left: calc(min(38vw, 420px) / -2);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff3d6 0%, #ffc678 28%, rgba(255,150,70,.55) 48%, rgba(255,120,60,0) 70%);
+  animation: filmPulse 8s ease-in-out infinite alternate;
+}
+#story .film-steam {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 18%;
+  width: 260px;
+  height: 340px;
+  margin-left: -130px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255,255,255,.26), rgba(255,255,255,0) 65%);
+  filter: blur(14px);
+  opacity: 0;
+  animation: filmSteam 7s ease-in-out infinite;
+}
+#story .film-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(circle at 20% 70%, rgba(255, 80, 140, .45), transparent 40%),
+    radial-gradient(circle at 80% 65%, rgba(255, 190, 60, .45), transparent 38%),
+    radial-gradient(circle at 50% 40%, rgba(90, 120, 255, .35), transparent 45%);
+  animation: filmGlow 6s ease-in-out infinite alternate;
+}
+#story .film-flight-light {
+  position: absolute;
+  z-index: 3;
+  left: 58%;
+  top: 42%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff4d4d;
+  box-shadow: 0 0 18px 6px rgba(255, 77, 77, .6);
+  animation: filmBlink 1.8s steps(1) infinite;
+}
+
+/* stars (flight + future) */
+#story .film-layer--flight .film-stage::before,
+#story .film-layer--future .film-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--stars);
+  animation: filmTwinkle 6s ease-in-out infinite alternate;
+}
+/* clouds (flight) */
+#story .film-layer--flight .film-stage::after {
+  content: "";
+  position: absolute;
+  left: -10%; right: -10%; bottom: 0;
+  height: 48%;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 30% 40% at 20% 80%, rgba(180,200,255,.20), transparent 70%),
+    radial-gradient(ellipse 36% 45% at 62% 90%, rgba(180,200,255,.16), transparent 70%),
+    radial-gradient(ellipse 26% 35% at 90% 75%, rgba(180,200,255,.14), transparent 70%);
+  animation: filmClouds 30s ease-in-out infinite alternate;
+}
+
+/* ---------- per-chapter look ---------- */
+#story .film-layer--dawn {
+  --sky-top:#140b26; --sky-bot:#e8944a;
+  --far-c:#3a1f3a; --mid-c:#1c0f1e; --near-c:#0a0508;
+  --shape-far:var(--hills); --shape-mid:var(--towers); --shape-near:var(--ground);
+}
+#story .film-layer--home {
+  --sky-top:#1d120d; --sky-bot:#c7703a;
+  --far-c:#4a2616; --mid-c:#2a150d; --near-c:#120804;
+  --shape-far:var(--hills); --shape-mid:var(--houses); --shape-near:var(--ground);
+}
+#story .film-layer--preparation {
+  --sky-top:#121722; --sky-bot:#6e5a52;
+  --far-c:#2c3042; --mid-c:#1a1d2b; --near-c:#0a0b12;
+  --shape-far:var(--hills); --shape-mid:var(--skyline); --shape-near:var(--ground);
+}
+#story .film-layer--food {
+  --sky-top:#2a1208; --sky-bot:#e3a04f;
+  --far-c:#5a2c12; --mid-c:#351a0c; --near-c:#160a05;
+  --shape-far:var(--hills); --shape-mid:var(--houses); --shape-near:var(--ground);
+}
+#story .film-layer--street {
+  --sky-top:#070815; --sky-bot:#2d2a5e;
+  --far-c:#14143a; --mid-c:#0c0c24; --near-c:#05050f;
+  --shape-far:var(--skyline); --shape-mid:var(--skyline); --shape-near:var(--ground);
+}
+#story .film-layer--culture {
+  --sky-top:#230a14; --sky-bot:#c8843a;
+  --far-c:#4d1a22; --mid-c:#2a0e14; --near-c:#110508;
+  --shape-far:var(--hills); --shape-mid:var(--towers); --shape-near:var(--ground);
+}
+#story .film-layer--festival {
+  --sky-top:#12061e; --sky-bot:#8a2f6a;
+  --far-c:#3a1245; --mid-c:#220a2e; --near-c:#0d0414;
+  --shape-far:var(--skyline); --shape-mid:var(--towers); --shape-near:var(--ground);
+}
+#story .film-layer--departure {
+  --sky-top:#0e1422; --sky-bot:#5f7194;
+  --far-c:#243049; --mid-c:#151c2e; --near-c:#080b14;
+  --shape-far:var(--hills); --shape-mid:var(--skyline); --shape-near:var(--ground);
+}
+#story .film-layer--flight {
+  --sky-top:#01030a; --sky-bot:#14264a;
+  --shape-far:var(--none); --shape-mid:var(--none); --shape-near:var(--none);
+}
+#story .film-layer--arrival {
+  --sky-top:#0a2535; --sky-bot:#f0a868;
+  --far-c:#1a4f5e; --mid-c:#0e3340; --near-c:#061a22;
+  --shape-far:var(--hills); --shape-mid:var(--waves); --shape-near:var(--ground);
+}
+#story .film-layer--philippines {
+  --sky-top:#052c36; --sky-bot:#f4c27a;
+  --far-c:#17606a; --mid-c:#0d4450; --near-c:#052229;
+  --shape-far:var(--hills); --shape-mid:var(--waves); --shape-near:var(--ground);
+}
+#story .film-layer--together {
+  --far-c:#3a2a45; --mid-c:#1f1a30; --near-c:#0a0a14;
+  --shape-far:var(--hills); --shape-mid:var(--skyline); --shape-near:var(--ground);
+}
+#story .film-layer--together .film-stage {
+  background: linear-gradient(100deg, #7a2e1a 0%, #2a1030 50%, #0d4a55 100%);
+}
+#story .film-layer--future {
+  --sky-top:#02030a; --sky-bot:#b88a4a;
+  --far-c:#1a1a2a; --mid-c:#0f0f1b; --near-c:#05050a;
+  --shape-far:var(--hills); --shape-mid:var(--none); --shape-near:var(--ground);
+}
+
+/* ---------- animations (paused when the chapter is off-screen) ---------- */
+@keyframes filmPulse   { from { transform: scale(1); opacity: .85; } to { transform: scale(1.07); opacity: 1; } }
+@keyframes filmSteam   { 0% { transform: translateY(0) scale(1); opacity: 0; } 30% { opacity: .6; } 100% { transform: translateY(-140px) scale(1.4); opacity: 0; } }
+@keyframes filmGlow    { from { opacity: .6; transform: scale(1); } to { opacity: 1; transform: scale(1.08); } }
+@keyframes filmBlink   { 0%, 100% { opacity: 1; } 50% { opacity: .15; } }
+@keyframes filmTwinkle { from { opacity: .55; } to { opacity: 1; } }
+@keyframes filmClouds  { from { transform: translateX(-3%); } to { transform: translateX(3%); } }
+
+#story .film-layer:not(.is-live) .film-stage *,
+#story .film-layer:not(.is-live) .film-stage::before,
+#story .film-layer:not(.is-live) .film-stage::after { animation-play-state: paused; }
+
+html.lowfx #story .film-orb,
+html.lowfx #story .film-steam,
+html.lowfx #story .film-glow { animation: none; filter: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  #story .film-stage *, #story .film-stage::before, #story .film-stage::after { animation: none !important; }
+}

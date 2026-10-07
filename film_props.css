@@ -1,0 +1,326 @@
+/* =========================================================
+   film_props.css : animated props for the 12 film chapters
+   Layer order inside a chapter:
+     depth planes (z2) -> props (z3) -> text (z5)
+   Naming: .fp-g--name = wrapper that GSAP moves on scroll.
+           Children inside wrappers use CSS loops (ambient).
+   ========================================================= */
+.fp { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.fp-g { position: absolute; inset: 0; }
+.fp i, .fp b, .fp em { display: block; font-style: normal; font-weight: inherit; }
+
+/* pause ambient loops off-screen, simplify on slow devices */
+.film-layer:not(.is-live) .fp *,
+.film-layer:not(.is-live) .fp *::before,
+.film-layer:not(.is-live) .fp *::after { animation-play-state: paused; }
+html.lowfx .fp-mote, html.lowfx .fp-wisp, html.lowfx .fp-g--powder,
+html.lowfx .fp-flow, html.lowfx .fp-streak { display: none; }
+@media (prefers-reduced-motion: reduce) { .fp * { animation: none !important; } }
+
+@keyframes fp-spin  { to { transform: rotate(360deg); } }
+@keyframes fp-blink { 0%, 100% { opacity: 1; } 50% { opacity: .15; } }
+@keyframes fp-bob   { from { transform: translateY(0); } to { transform: translateY(-1.4vmin); } }
+
+/* ---------- floating light dust (all chapters) ---------- */
+.fp-mote {
+  position: absolute; width: var(--s); height: var(--s); border-radius: 50%;
+  background: rgb(var(--c)); box-shadow: 0 0 calc(var(--s) * 3) rgba(var(--c), .7);
+  opacity: 0; animation: fp-float var(--dur) linear infinite;
+}
+@keyframes fp-float {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: .9; } 85% { opacity: .6; }
+  100% { transform: translate(var(--dx), -34vh); opacity: 0; }
+}
+
+/* ---------- birds ---------- */
+.fp-bird { position: absolute; left: 0; width: calc(26px * var(--sc)); color: #2a1420; opacity: .85;
+  animation: fp-fly var(--dur) linear infinite; animation-delay: var(--delay); }
+@keyframes fp-fly { from { transform: translateX(-14vw); } to { transform: translateX(112vw); } }
+.fp-bird path { fill: currentColor; transform-box: fill-box; transform-origin: 50% 60%;
+  animation: fp-flap .45s ease-in-out infinite alternate; }
+@keyframes fp-flap { from { transform: scaleY(1); } to { transform: scaleY(.25); } }
+
+/* ---------- string lights / festival strand ---------- */
+.fp-strand { position: absolute; left: 0; right: 0; top: 0; height: 24vh; }
+.fp-strand svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fp-strand path { fill: none; stroke: rgba(255, 224, 170, .45); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.fp-strand i { position: absolute; width: 1.3vmin; height: 1.9vmin; margin: -.2vmin 0 0 -.65vmin;
+  border-radius: 50% 50% 55% 55%; background: var(--c); box-shadow: 0 0 1.8vmin var(--c);
+  animation: fp-twinkle var(--d) ease-in-out infinite alternate; }
+@keyframes fp-twinkle { from { filter: brightness(.55); } to { filter: brightness(1.3); } }
+
+/* ---------- falling petals (culture, philippines) ---------- */
+.fp-petal { position: absolute; top: -4vh; width: var(--w); height: calc(var(--w) * 1.5);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: var(--c); opacity: 0;
+  animation: fp-fall var(--dur) linear infinite; animation-delay: var(--delay); }
+@keyframes fp-fall {
+  0% { transform: translate(0, 0) rotate(0); opacity: 0; } 8% { opacity: .9; }
+  100% { transform: translate(var(--dx), 112vh) rotate(540deg); opacity: .8; }
+}
+
+/* ---------- rising lanterns (festival, future) ---------- */
+.fp-lantern { position: absolute; bottom: -8%; width: var(--w); height: calc(var(--w) * 1.3);
+  border-radius: 38% 38% 30% 30%;
+  background: radial-gradient(circle at 50% 70%, #fff0c2, #ffb347 55%, #e0662a);
+  box-shadow: 0 0 calc(var(--w) * .9) rgba(255, 170, 70, .75); opacity: 0;
+  animation: fp-rise var(--dur) linear infinite; animation-delay: var(--delay); }
+@keyframes fp-rise {
+  0% { transform: translate(0, 0); opacity: 0; } 10% { opacity: .95; } 85% { opacity: .8; }
+  100% { transform: translate(var(--sw), -118vh); opacity: 0; }
+}
+
+/* ---------- planes (departure, flight) ---------- */
+.fp-plane { position: absolute; left: 0; color: #0a0d16; }
+.fp-bob { position: relative; animation: fp-bob 4s ease-in-out infinite alternate; }
+.fp-plane svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 0 1.4vmin rgba(160, 190, 255, .35)); }
+.fp-beacon { position: absolute; left: 9%; top: 4%; width: 1vmin; height: 1vmin; border-radius: 50%;
+  background: #ff4b4b; box-shadow: 0 0 1.6vmin #ff4b4b; animation: fp-blink 1.4s steps(1) infinite; }
+.fp-plane--dep { bottom: 9%; width: min(30vw, 270px); }
+.fp-plane--fl  { bottom: 6%; left: 8%; width: min(34vw, 320px); color: #0b1020; }
+
+/* =========================================================
+   1. DAWN
+   ========================================================= */
+.fp-band { position: absolute; left: 0; right: 0; bottom: 0; height: 46%;
+  background: linear-gradient(to top, rgba(255, 170, 90, .45), rgba(255, 120, 70, .12) 55%, transparent); }
+.fp-raywrap { position: absolute; left: 50%; bottom: calc(26% + min(19vw, 210px));
+  width: 150vmax; height: 150vmax; transform: translate(-50%, 50%); }
+.fp-rays { position: absolute; inset: 0;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 214, 150, .18) 0 3deg, transparent 3deg 12deg);
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 0, transparent 100%);
+          mask-image: radial-gradient(circle closest-side, #000 0, transparent 100%);
+  animation: fp-spin 140s linear infinite; }
+
+/* =========================================================
+   2. HOME
+   ========================================================= */
+.fp-beam { position: absolute; left: -12%; top: -12%; width: 56%; height: 150%;
+  background: linear-gradient(98deg, transparent 0, rgba(255, 222, 170, .20) 35%, rgba(255, 222, 170, .06) 70%, transparent);
+  transform: skewX(-16deg); filter: blur(10px); animation: fp-beam 9s ease-in-out infinite alternate; }
+@keyframes fp-beam { from { opacity: .6; } to { opacity: 1; } }
+.fp-win { position: absolute; width: 2.4vmin; height: 3.4vmin; border-radius: 2px 2px 0 0;
+  background: #ffd48a; box-shadow: 0 0 2.4vmin rgba(255, 190, 100, .75);
+  animation: fp-flicker var(--d) steps(1, end) infinite; }
+@keyframes fp-flicker {
+  0%, 100% { filter: brightness(1); } 9% { filter: brightness(.55); } 12% { filter: brightness(1.15); }
+  55% { filter: brightness(.85); } 58% { filter: brightness(1); }
+}
+
+/* =========================================================
+   3. PREPARATION
+   ========================================================= */
+.fp-case { position: absolute; left: 50%; bottom: 5%; width: min(30vw, 250px); margin-left: calc(min(30vw, 250px) / -2); }
+.fp-case svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 0 2vmin rgba(201, 164, 92, .35)); }
+.fp-click { position: absolute; inset: 0; margin: auto; width: 60%; aspect-ratio: 1; border-radius: 50%;
+  border: 2px solid #ffd9a0; box-shadow: 0 0 3vmin rgba(255, 217, 160, .7); opacity: 0; }
+.fp-cloth { position: absolute; left: 50%; bottom: calc(5% + min(9vw, 76px)); width: 64px; height: 42px;
+  margin-left: -32px; border-radius: 8px; background: var(--c);
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .18), 0 0 14px rgba(0, 0, 0, .35); opacity: 0; }
+
+/* =========================================================
+   4. FOOD
+   ========================================================= */
+.fp-chai { position: absolute; left: 11%; bottom: 7%; width: min(22vw, 190px); }
+.fp-chai svg { display: block; width: 100%; height: auto; overflow: visible; }
+.fp-wisp { position: absolute; left: 34%; bottom: 86%; width: 14%; height: 60%; border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, .32), transparent 70%);
+  filter: blur(8px); opacity: 0; animation: fp-wisp 5.5s ease-in-out infinite; animation-delay: var(--d); }
+@keyframes fp-wisp {
+  0% { transform: translate(0, 0) scale(.7); opacity: 0; } 30% { opacity: .7; }
+  100% { transform: translate(var(--dx), -120%) scale(1.5); opacity: 0; }
+}
+.fp-thali { position: absolute; right: 10%; bottom: 6%; width: min(25vw, 230px); }
+.fp-thali svg { display: block; width: 100%; height: auto; animation: fp-spin 70s linear infinite;
+  filter: drop-shadow(0 0 2vmin rgba(0, 0, 0, .5)); }
+.fp-spice { position: absolute; color: var(--c); font: 300 var(--s) / 1 'Cormorant Garamond', serif;
+  text-shadow: 0 0 10px var(--c); opacity: 0; animation: fp-spice var(--dur) linear infinite; }
+@keyframes fp-spice {
+  0% { transform: translate(0, 0) rotate(0); opacity: 0; } 15% { opacity: .85; }
+  100% { transform: translate(var(--dx), -40vh) rotate(260deg); opacity: 0; }
+}
+
+/* =========================================================
+   5. STREET
+   ========================================================= */
+.fp-windows { position: absolute; left: 0; right: 0; bottom: 0; height: 42%; opacity: .35;
+  background: radial-gradient(circle, rgba(255, 214, 140, .85) 0 22%, transparent 26%) 0 0 / 36px 56px;
+  -webkit-mask-image: linear-gradient(to top, #000 25%, transparent);
+          mask-image: linear-gradient(to top, #000 25%, transparent);
+  animation: fp-flicker 7s steps(1, end) infinite; }
+.fp-signal { position: absolute; right: 9%; bottom: 17%; display: flex; flex-direction: column; gap: .9vmin;
+  padding: 1.2vmin; border-radius: 1.6vmin; background: #06060d; border: 1px solid rgba(255, 255, 255, .12); }
+.fp-signal i { width: 2.4vmin; height: 2.4vmin; border-radius: 50%; background: #222;
+  animation: fp-sig 6s steps(1, end) infinite; }
+.fp-signal i:nth-child(1) { --on: #ff4b4b; animation-delay: 0s; }
+.fp-signal i:nth-child(2) { --on: #ffc24a; animation-delay: -2s; }
+.fp-signal i:nth-child(3) { --on: #4aff8a; animation-delay: -4s; }
+@keyframes fp-sig { 0% { background: var(--on); box-shadow: 0 0 1.8vmin var(--on); } 33.3%, 100% { background: #222; box-shadow: none; } }
+.fp-sign { position: absolute; padding: .6vmin 1.6vmin; border: 2px solid var(--c); border-radius: .8vmin;
+  font: 500 2.2vmin / 1 'Inter', sans-serif; letter-spacing: .3em; color: var(--c);
+  text-shadow: 0 0 1.6vmin var(--c); box-shadow: 0 0 2vmin var(--c), inset 0 0 1.4vmin var(--c);
+  animation: fp-neon 5s steps(1, end) infinite; }
+@keyframes fp-neon { 0%, 100% { opacity: 1; } 42% { opacity: .35; } 44% { opacity: 1; } 47% { opacity: .5; } 49% { opacity: 1; } }
+.fp-streak { position: absolute; left: 0; width: 18vw; height: 2px; border-radius: 2px; opacity: .8;
+  background: linear-gradient(90deg, transparent, var(--c), transparent); filter: blur(1px);
+  animation: fp-streak var(--dur) linear infinite; animation-delay: var(--delay); }
+@keyframes fp-streak { from { transform: translateX(-22vw); } to { transform: translateX(115vw); } }
+.fp-rick { position: absolute; left: 0; width: min(24vw, 210px); color: #0b0709; }
+.fp-rick svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 0 1.4vmin rgba(255, 200, 120, .35)); }
+.fp-rick--a { bottom: 12%; }
+.fp-rick--b { bottom: 5%; }
+.fp-rick--b svg { transform: scaleX(-1); }
+
+/* =========================================================
+   6. CULTURE
+   ========================================================= */
+.fp-mandala { position: absolute; left: 50%; top: 50%; width: min(92vmin, 820px); height: min(92vmin, 820px);
+  margin: calc(min(92vmin, 820px) / -2) 0 0 calc(min(92vmin, 820px) / -2); }
+.fp-mandala svg { width: 100%; height: 100%; opacity: .42; overflow: visible; }
+.fp-mandala .m-p { fill: none; stroke: #e6b25a; stroke-width: 1; }
+.fp-mandala .m-f { fill: rgba(230, 170, 70, .09); stroke: #e6b25a; stroke-width: .8; }
+.fp-mandala .m-d { fill: #f2c777; }
+
+/* =========================================================
+   7. FESTIVAL
+   ========================================================= */
+.fp-burst { position: absolute; width: 0; height: 0; }
+.fp-burst b { position: absolute; left: -1px; top: 0; width: 2px; height: 16px; border-radius: 2px;
+  background: var(--col); box-shadow: 0 0 8px var(--col); opacity: 0; transform-origin: 50% 0;
+  animation: fp-ray 4.2s cubic-bezier(.12, .7, .3, 1) infinite; animation-delay: var(--delay); }
+@keyframes fp-ray {
+  0% { transform: rotate(var(--a)) translateY(0) scaleY(.3); opacity: 0; } 5% { opacity: 1; } 60% { opacity: .85; }
+  100% { transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scaleY(1); opacity: 0; }
+}
+.fp-g--powder i { position: absolute; width: 52vmin; height: 52vmin; border-radius: 50%;
+  filter: blur(40px); mix-blend-mode: screen; background: radial-gradient(circle, var(--c), transparent 66%); }
+.fp-g--diyas { inset: auto 0 3% 0; height: 9%; display: flex; justify-content: space-evenly; align-items: flex-end; }
+.fp-diya { position: relative; width: 5.4vmin; height: 2.2vmin; border-radius: 0 0 100% 100% / 0 0 100% 100%;
+  background: linear-gradient(#b5651d, #6a3410); }
+.fp-diya::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 1.2vmin; height: 2.6vmin;
+  margin-left: -.6vmin; border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+  background: linear-gradient(#fff8d6, #ffb02e 60%, #ff6a00); box-shadow: 0 0 2.4vmin 4px rgba(255, 160, 40, .8);
+  transform-origin: 50% 100%; animation: fp-flame .5s ease-in-out infinite alternate; animation-delay: var(--d); }
+@keyframes fp-flame { from { transform: scale(.9, .85) skewX(-4deg); } to { transform: scale(1.1, 1.15) skewX(4deg); } }
+
+/* =========================================================
+   8. DEPARTURE
+   ========================================================= */
+.fp-board { position: absolute; left: 0; right: 0; top: 7%; margin: 0 auto; width: max-content; max-width: 92vw;
+  display: flex; align-items: center; gap: 2.4vmin; padding: 1.5vmin 3vmin; border-radius: 1vmin;
+  background: rgba(5, 8, 16, .72); border: 1px solid rgba(201, 164, 92, .45);
+  font: 500 2vmin / 1 'Inter', sans-serif; letter-spacing: .3em; color: #f6efe4; }
+.fp-board em { color: #c9a45c; }
+.fp-board .fp-status { color: #7dff9a; animation: fp-blink 1.2s steps(1) infinite; }
+.fp-g--runway { inset: auto 0 0 0; height: 9%; }
+.fp-runway { position: absolute; left: 0; right: 0; bottom: 0; height: 100%;
+  background: linear-gradient(to top, #07080d, rgba(7, 8, 13, 0)); }
+.fp-runway::before, .fp-runway::after { content: ""; position: absolute; left: 0; right: 0; height: .9vmin;
+  background: repeating-linear-gradient(90deg, var(--l) 0 1.1vmin, transparent 1.1vmin 7vmin);
+  filter: drop-shadow(0 0 4px var(--l)); animation: fp-lights 1.6s linear infinite; }
+.fp-runway::before { --l: #ffe1a0; bottom: 28%; }
+.fp-runway::after { --l: #6fb8ff; bottom: 62%; animation-duration: 2.4s; }
+@keyframes fp-lights { to { background-position: -14vmin 0; } }
+
+/* =========================================================
+   9. FLIGHT
+   ========================================================= */
+.fp-window { position: absolute; inset: 3.2vmin; border-radius: 14vmin;
+  box-shadow: 0 0 0 120vmax #04060c, inset 0 0 6vmin rgba(150, 180, 255, .12);
+  border: 1px solid rgba(180, 200, 255, .22); }
+.fp-cloud { position: absolute; left: 0; width: var(--w); height: var(--h); border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(190, 205, 255, .22), transparent 70%); filter: blur(14px);
+  animation: fp-cloud var(--dur) linear infinite; animation-delay: var(--delay); }
+@keyframes fp-cloud { from { transform: translateX(120vw); } to { transform: translateX(-60vw); } }
+.fp-route { position: absolute; left: 0; right: 0; top: 7%; margin: 0 auto; width: min(86vw, 1100px); }
+.fp-route svg { display: block; width: 100%; height: auto; overflow: visible; }
+.fp-route path { fill: none; stroke-linecap: round; }
+.fp-route .base { stroke: rgba(255, 226, 170, .28); stroke-width: 2; stroke-dasharray: 6 10; }
+.fp-route .prog { stroke: rgba(255, 226, 170, .9); stroke-width: 3; }
+.fp-route .dot { fill: #fff; filter: drop-shadow(0 0 8px #ffd9a0); }
+.fp-route .pin { fill: #c9a45c; }
+.fp-route text { fill: rgba(246, 239, 228, .8); font: 500 18px 'Inter', sans-serif; letter-spacing: 6px; }
+
+/* =========================================================
+   10. ARRIVAL
+   ========================================================= */
+.fp-g--glimmer { inset: auto 0 0 0; height: 30%; }
+.fp-glim { position: absolute; left: 50%; bottom: 0; width: 18vw; height: 100%; margin-left: -9vw;
+  background: repeating-linear-gradient(to bottom, rgba(255, 226, 170, .55) 0 2px, transparent 2px 14px);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 0, #000 20%, transparent 70%);
+          mask-image: radial-gradient(ellipse at 50% 0, #000 20%, transparent 70%);
+  animation: fp-glim 3s ease-in-out infinite alternate; }
+@keyframes fp-glim { from { filter: brightness(.7); } to { filter: brightness(1.3); } }
+.fp-wave { position: absolute; left: -10%; width: 130%; height: 12%; bottom: var(--b);
+  background: radial-gradient(ellipse 70px 12px at 50% 100%, rgba(255, 255, 255, .2), transparent 72%) 0 0 / 140px 100% repeat-x;
+  animation: fp-wave var(--dur) linear infinite; }
+@keyframes fp-wave { to { background-position: 140px 0; } }
+.fp-jeep { position: absolute; left: 0; bottom: 11%; width: min(36vw, 310px); color: #0c1b22; }
+.fp-jeep svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 0 1.4vmin rgba(255, 220, 150, .3)); }
+.fp-palm { position: absolute; bottom: -2%; width: min(34vw, 300px); color: #04141a; }
+.fp-palm--l { left: -2%; } .fp-palm--r { right: -2%; }
+.fp-palm svg { display: block; width: 100%; height: auto; transform-origin: 50% 100%;
+  animation: fp-sway 5.5s ease-in-out infinite alternate; }
+@keyframes fp-sway { from { transform: rotate(-1.6deg); } to { transform: rotate(1.8deg); } }
+
+/* =========================================================
+   11. HER WORLD (philippines)
+   ========================================================= */
+.fp-parol { position: absolute; top: 0; display: flex; flex-direction: column; align-items: center;
+  width: var(--w); margin-left: calc(var(--w) / -2); transform-origin: 50% 0;
+  animation: fp-swing var(--dur) ease-in-out infinite alternate; }
+.fp-parol i { width: 1px; height: var(--len); background: rgba(255, 230, 170, .55); }
+.fp-parol svg { width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 0 2.4vmin var(--c)); }
+@keyframes fp-swing { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+.fp-bunting { position: absolute; left: 0; right: 0; top: 0; height: 20vh; }
+.fp-bunting svg { width: 100%; height: 100%; display: block; transform-origin: 50% 0; animation: fp-flutter 4s ease-in-out infinite alternate; }
+.fp-bunting path { fill: none; stroke: rgba(255, 230, 170, .6); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+@keyframes fp-flutter { from { transform: skewX(-.6deg); } to { transform: skewX(.6deg); } }
+.fp-kubo { position: absolute; left: 5%; bottom: 14%; width: min(30vw, 280px); color: #031a20; }
+.fp-kubo svg { display: block; width: 100%; height: auto; }
+.fp-kubo .lit { fill: #ffd98a; filter: drop-shadow(0 0 6px #ffcf70); animation: fp-flicker 6s steps(1, end) infinite; }
+
+/* =========================================================
+   12. TOGETHER
+   ========================================================= */
+.fp-orb { position: absolute; top: 42%; left: 50%; width: min(46vmin, 420px); height: min(46vmin, 420px);
+  margin: calc(min(46vmin, 420px) / -2) 0 0 calc(min(46vmin, 420px) / -2);
+  border-radius: 50%; mix-blend-mode: screen; filter: blur(2px); }
+.fp-orb--l { background: radial-gradient(circle, #fff1d0 0, #ffa24a 30%, rgba(255, 110, 60, .35) 55%, transparent 70%); }
+.fp-orb--r { background: radial-gradient(circle, #e6ffff 0, #4ad8e8 30%, rgba(40, 140, 230, .35) 55%, transparent 70%); }
+.fp-seam { position: absolute; left: 50%; top: 6%; bottom: 6%; width: 2px; margin-left: -1px;
+  background: linear-gradient(to bottom, transparent, #fff 30%, #fff 70%, transparent);
+  box-shadow: 0 0 18px 4px rgba(255, 255, 255, .55); }
+.fp-merge { position: absolute; left: 50%; top: 42%; width: 90vmin; height: 90vmin; margin: -45vmin 0 0 -45vmin;
+  border-radius: 50%; mix-blend-mode: screen; opacity: 0;
+  background: radial-gradient(circle, #fff 0, rgba(255, 226, 190, .7) 25%, transparent 62%); }
+.fp-flow { position: absolute; width: var(--s); height: var(--s); border-radius: 50%; background: rgb(var(--c));
+  box-shadow: 0 0 calc(var(--s) * 3) rgba(var(--c), .8); opacity: 0;
+  animation: fp-flow var(--dur) linear infinite; animation-delay: var(--delay); }
+@keyframes fp-flow { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: .9; } 100% { transform: translate(var(--fx), var(--fy)); opacity: 0; } }
+.fp-heart { position: absolute; bottom: -6%; color: #ff9db8; font-size: var(--s); text-shadow: 0 0 14px rgba(255, 150, 180, .9);
+  opacity: 0; animation: fp-hrise var(--dur) ease-in infinite; animation-delay: var(--delay); }
+@keyframes fp-hrise { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 12% { opacity: .95; } 100% { transform: translate(var(--dx), -108vh) scale(1.1); opacity: 0; } }
+
+/* =========================================================
+   13. FUTURE
+   ========================================================= */
+.fp-horizon { position: absolute; left: 50%; bottom: 20%; width: 120vmin; height: 60vmin; margin-left: -60vmin;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 200, 120, .75), rgba(255, 130, 70, .25) 40%, transparent 70%);
+  transform-origin: 50% 100%; }
+.fp-g--road { inset: auto 0 0 0; height: 42%; overflow: hidden; perspective: 520px; }
+.fp-road { position: absolute; left: 50%; bottom: -12%; width: 220%; height: 150%; margin-left: -110%;
+  transform: rotateX(64deg); transform-origin: 50% 100%; }
+.fp-road .rd { position: absolute; left: 30%; width: 40%; top: 0; bottom: 0; background: #0d0d17;
+  border-left: 3px solid rgba(255, 214, 150, .4); border-right: 3px solid rgba(255, 214, 150, .4); }
+.fp-road .dash { position: absolute; left: 49.6%; width: .8%; top: 0; bottom: 0;
+  background: linear-gradient(to bottom, rgba(255, 226, 170, .95) 0 50%, transparent 50% 100%) 0 0 / 100% 120px repeat-y;
+  animation: fp-dash 1.2s linear infinite; }
+@keyframes fp-dash { to { background-position: 0 120px; } }
+.fp-shoot { position: absolute; width: 120px; height: 2px; opacity: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff);
+  animation: fp-shoot var(--dur) linear infinite; animation-delay: var(--delay); }
+@keyframes fp-shoot {
+  0% { transform: rotate(24deg) translateX(0); opacity: 0; } 3% { opacity: 1; }
+  12% { transform: rotate(24deg) translateX(460px); opacity: 0; } 100% { transform: rotate(24deg) translateX(460px); opacity: 0; }
+}

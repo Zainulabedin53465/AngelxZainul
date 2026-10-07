@@ -1,0 +1,157 @@
+/* =========================================================
+   love.css : final scene "Angel & Zainul"
+   Scroll length of the whole scene = --love-length
+   ========================================================= */
+:root { --love-length: 1100vh; }
+@media (max-width: 700px) { :root { --love-length: 900vh; } }
+
+/* runway + pinned stage (same pattern as the film chapters) */
+#story .love {
+  position: relative;
+  height: var(--love-length);
+  margin: calc(var(--stage-h, 100vh) * -1) 0 0;
+  pointer-events: none;
+}
+#story .love__stage {
+  position: sticky;
+  top: 0;
+  height: var(--stage-h, 100vh);
+  overflow: hidden;
+  isolation: isolate;
+  visibility: hidden;
+  background: radial-gradient(ellipse at 50% 55%, #1a1330 0%, #0a0a1c 45%, #03030a 100%);
+}
+#story .love.is-on .love__stage { visibility: visible; }
+
+#story .love__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+#story .love__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* ---------- captions (one at a time, same spot) ---------- */
+#story .love__caps {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--stage-h, 100vh) * 0.13);
+  z-index: 4;
+  display: grid;
+  justify-items: center;
+  padding: 0 7vw;
+}
+#story .love__cap {
+  grid-area: 1 / 1;
+  margin: 0;
+  text-align: center;
+  opacity: 0;
+  font: italic 300 clamp(1.35rem, 3.1vw, 2.6rem)/1.25 'Cormorant Garamond', serif;
+  letter-spacing: 0.02em;
+  color: rgba(246, 239, 228, 0.92);
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- title card ---------- */
+#story .love__titlebox {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--stage-h, 100vh) * 0.075);
+  z-index: 5;
+  text-align: center;
+  padding: 0 5vw;
+}
+#story .love__title {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.1em 0.45em;
+  font: 300 clamp(2.1rem, 6.6vw, 6rem)/1.05 'Cormorant Garamond', serif;
+  filter: drop-shadow(0 4px 30px rgba(255, 170, 100, 0.35));
+}
+#story .love__t {
+  opacity: 0;
+  letter-spacing: 0.28em;
+  margin-right: -0.28em;
+  background: linear-gradient(180deg, #fff7e6 20%, #ffd7a0 60%, #f0a46e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+#story .love__amp {
+  opacity: 0;
+  font-style: italic;
+  color: #ffb7a0;
+}
+#story .love__sub {
+  margin: 1rem 0 0;
+  opacity: 0;
+  font: italic 300 clamp(1.1rem, 2.2vw, 1.7rem)/1.2 'Cormorant Garamond', serif;
+  letter-spacing: 0.35em;
+  color: rgba(246, 239, 228, 0.85);
+}
+
+/* ---------- credits roll ---------- */
+#story .love__credits {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%);
+}
+#story .love__roll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  padding: 0 8vw;
+  text-align: center;
+  will-change: transform;
+}
+#story .love__block { margin: 0 0 clamp(3.2rem, 9vh, 6rem); }
+#story .love__role {
+  display: block;
+  margin-bottom: 1rem;
+  font: 500 0.72rem/1 'Inter', sans-serif;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--film-gold, #c9a45c);
+}
+#story .love__line {
+  display: block;
+  font: 300 clamp(1.5rem, 3.4vw, 2.6rem)/1.35 'Cormorant Garamond', serif;
+  color: #f6efe4;
+}
+
+/* ---------- end card ---------- */
+#story .love__end {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6vw;
+  opacity: 0;
+}
+#story .love__end p {
+  margin: 0;
+  text-align: center;
+  font: italic 300 clamp(1.8rem, 5vw, 4rem)/1.2 'Cormorant Garamond', serif;
+  letter-spacing: 0.04em;
+  color: #f6efe4;
+  text-shadow: 0 2px 40px rgba(255, 170, 100, 0.4);
+}

@@ -1,0 +1,1341 @@
+/* =========================================================
+   1. DESIGN TOKENS
+   ========================================================= */
+:root {
+  --black: #050505;
+  --charcoal: #0e0e10;
+  --white: #f2efe9;
+  --muted: rgba(242, 239, 233, 0.55);
+  --gold: #c9a45c;
+  --red: #b3262e;
+  --blue: #2a4fa8;
+
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-ui: "Inter", system-ui, sans-serif;
+
+  --fs-hero: clamp(2rem, 7.5vw, 6.5rem);
+  --fs-sub: clamp(1rem, 3vw, 2.2rem);
+  --fs-body: clamp(0.9rem, 1.1vw + 0.5rem, 1.15rem);
+
+  --ease-cinema: cubic-bezier(0.22, 1, 0.36, 1);
+  --bar-size: 9vh;   /* final height of the letterbox bars */
+}
+
+/* =========================================================
+   2. RESET + BASE
+   ========================================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { background: var(--black); -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================
+   3. CINEMATIC OVERLAYS
+   ========================================================= */
+.overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.overlay--vignette {
+  background: radial-gradient(ellipse at center,
+    transparent 45%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.overlay--grain {
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* =========================================================
+   4. LETTERBOX BARS
+   Each bar is half the screen tall (so together they cover it),
+   then GSAP scales them down with transform (GPU-friendly).
+   ========================================================= */
+.bar {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 50vh;
+  background: #000;
+  z-index: 90;            /* above scenes, below grain/vignette */
+  pointer-events: none;
+  will-change: transform;
+}
+.bar--top    { top: 0;    transform-origin: top; }
+.bar--bottom { bottom: 0; transform-origin: bottom; }
+
+/* =========================================================
+   5. SCENES
+   ========================================================= */
+.scene {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Soft warm light behind the title, "breathes" very slowly */
+.glow {
+  position: absolute;
+  width: 70vmin;
+  height: 70vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 164, 92, 0.12), transparent 65%);
+  filter: blur(40px);
+  animation: breathe 8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(0.9); opacity: 0.6; }
+  50%      { transform: scale(1.1); opacity: 1; }
+}
+
+/* =========================================================
+   6. OPENING TITLE
+   ========================================================= */
+.title {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 300;
+  line-height: 1.15;
+}
+
+.title__line {
+  display: block;
+  letter-spacing: 0.35em;
+  padding-left: 0.35em;   /* balances trailing letter-spacing so it looks centred */
+}
+
+.title__line--one { font-size: var(--fs-hero); }
+
+.title__line--two {
+  font-size: var(--fs-sub);
+  letter-spacing: 0.6em;
+  padding-left: 0.6em;
+  color: var(--gold);
+  margin-top: 1.2rem;
+}
+
+/* Each letter is wrapped in a span by JS so it can animate individually */
+.char { display: inline-block; will-change: transform, opacity, filter; }
+
+/* Hide titles only when JS is running; JS reveals them once letters are split */
+.js .title__line { visibility: hidden; }
+
+/* =========================================================
+   7. SCROLL CUE
+   ========================================================= */
+.cue {
+  position: absolute;
+  bottom: calc(var(--bar-size) + 1.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  opacity: 0;
+}
+.js .cue { opacity: 0; }
+
+.cue__text {
+  font-size: 0.65rem;
+  letter-spacing: 0.4em;
+  padding-left: 0.4em;
+  color: var(--muted);
+}
+.cue__line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, var(--muted), transparent);
+  transform-origin: top;
+  animation: cueline 2.2s var(--ease-cinema) infinite;
+}
+@keyframes cueline {
+  0%   { transform: scaleY(0); opacity: 1; }
+  60%  { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+
+/* =========================================================
+   8. ACCESSIBILITY
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Small phones: slightly tighter letter-spacing so "TWO WORLDS." never overflows */
+@media (max-width: 480px) {
+  .title__line--one { letter-spacing: 0.2em; padding-left: 0.2em; }
+  .title__line--two { letter-spacing: 0.4em; padding-left: 0.4em; }
+}
+
+/* =========================================================
+   9. LENIS (recommended base rules from the library)
+   ========================================================= */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+/* =========================================================
+   10. PROGRESS LINE
+   ========================================================= */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  z-index: 95;
+  pointer-events: none;
+}
+.progress__fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
+}
+
+/* =========================================================
+   11. RUNWAY (tall section with a pinned stage: the pattern
+   every future scene will use). We use CSS sticky instead of
+   JS pinning because it's lighter and smoother.
+   ========================================================= */
+.runway {
+  position: relative;
+  height: 300vh;
+  height: 300svh;
+}
+.runway__stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 40%, #16120d, var(--black) 70%);
+}
+.test-text {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  letter-spacing: 0.3em;
+  padding-left: 0.3em;
+  line-height: 1.3;
+}
+.test-text small {
+  display: block;
+  margin-top: 1rem;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+}
+
+/* =========================================================
+   12. SCENE 02: INDIA
+   ========================================================= */
+.runway--india { height: 450vh; height: 450svh; }
+.runway--india .runway__stage { background: none; overflow: hidden; }
+
+/* Sky: black at the top, warming to saffron at the horizon */
+.sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+    #060403 0%, #1a0c08 35%, #4a1f10 62%, #a8481f 82%, #d9822f 100%);
+}
+
+/* Sun: sits behind the monument, rises slowly on scroll */
+.sun {
+  position: absolute;
+  left: 50%;
+  bottom: 14%;
+  width: 55vmin;
+  height: 55vmin;
+  margin-left: -27.5vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 190, 110, 0.9), rgba(255, 140, 60, 0.35) 40%, transparent 68%);
+  filter: blur(6px);
+  will-change: transform;
+}
+
+/* Optional user photo, sits between sky and silhouettes */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+  mix-blend-mode: soft-light;
+  will-change: transform;
+}
+
+/* Silhouette layers: anchored to the bottom, scaled from the bottom centre */
+.layer {
+  position: absolute;
+  left: -10%;
+  bottom: 0;
+  width: 120%;
+  height: 62%;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+/* Haze softens the transition between layers = atmospheric depth */
+.haze {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 45%;
+  background: linear-gradient(to top, rgba(217, 130, 47, 0.18), transparent);
+  pointer-events: none;
+}
+
+/* Embers */
+.embers { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.ember {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 50%;
+  background: #ffcf8a;
+  box-shadow: 0 0 6px 1px rgba(255, 180, 90, 0.7);
+  opacity: 0;
+  animation: rise var(--dur, 12s) linear infinite;
+  will-change: transform, opacity;
+}
+@keyframes rise {
+  0%   { transform: translate3d(0, 0, 0);                     opacity: 0; }
+  10%  { opacity: 0.9; }
+  80%  { opacity: 0.6; }
+  100% { transform: translate3d(var(--drift, 0), -105vh, 0);  opacity: 0; }
+}
+
+/* Text sits in the upper third so the skyline stays visible */
+.india__text {
+  position: absolute;
+  top: 20%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  padding: 0 1.5rem;
+  z-index: 5;
+}
+.india__word {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(3rem, 12vw, 10rem);
+  letter-spacing: 0.4em;
+  padding-left: 0.4em;
+  line-height: 1;
+}
+.india__sub {
+  margin-top: 1.2rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.1rem, 2.6vw, 2rem);
+  letter-spacing: 0.12em;
+  color: rgba(242, 239, 233, 0.8);
+}
+.js .india__sub { opacity: 0; }
+
+.india__fade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 8;
+}
+
+/* Small dev label: delete this rule + the <span class="ph-label"> when you add real photos */
+.ph-label {
+  position: absolute;
+  left: 1rem;
+  bottom: calc(var(--bar-size) + 0.8rem);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: rgba(242, 239, 233, 0.35);
+  z-index: 6;
+}
+
+@media (max-width: 768px) {
+  .layer { height: 52%; }
+  .india__text { top: 16%; }
+  .india__word { letter-spacing: 0.25em; padding-left: 0.25em; }
+  .sun { bottom: 18%; }
+}
+
+/* =========================================================
+   13. PERFORMANCE OVERRIDES
+   ========================================================= */
+
+/* Grain: grayscale noise, NO blend mode (blend modes over the full screen are costly) */
+.overlay--grain {
+  opacity: 0.06;
+  mix-blend-mode: normal;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Big blur() filters removed: the gradients are already soft */
+.glow { filter: none; }
+.sun  { filter: none; }
+
+/* Photo slot: plain opacity instead of a blend mode */
+.backdrop { mix-blend-mode: normal; opacity: 0.35; }
+
+/* Embers: no box-shadow (each shadow is an extra paint) */
+.ember { box-shadow: none; }
+
+/* GPU layers only where something actually animates */
+.char  { will-change: auto; }
+.title { will-change: transform, opacity; }
+.layer { backface-visibility: hidden; }
+
+/* Pause infinite animations while their scene is off-screen */
+.scene--opening:not(.is-live) .glow  { animation-play-state: paused; }
+.runway--india:not(.is-live) .ember  { animation-play-state: paused; }
+
+/* Auto low-effects mode (added by JS when FPS stays low) */
+.lowfx .overlay--grain,
+.lowfx .embers,
+.lowfx .haze { display: none; }
+.lowfx .glow { animation: none; }
+
+/* =========================================================
+   14. SCENE 03: PHILIPPINES
+   ========================================================= */
+.runway--ph { height: 450vh; height: 450svh; }
+.runway--ph .runway__stage { background: none; overflow: hidden; }
+
+/* Sky: night blue at the top, dawn peach at the horizon (74% down) */
+.ph-sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+    #01050d 0%, #061a31 28%, #0f4a63 50%, #3c8791 64%, #f2b783 74%, #f2b783 100%);
+}
+
+/* Sun sits on the horizon; the sea (drawn after it) hides its lower half */
+.ph-sun {
+  position: absolute;
+  left: 62%;
+  bottom: calc(26% - 18vmin);
+  width: 36vmin;
+  height: 36vmin;
+  margin-left: -18vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    #fff3d6 0, #fff3d6 10%, rgba(255, 190, 120, 0.85) 22%,
+    rgba(255, 150, 80, 0.3) 45%, transparent 68%);
+  will-change: transform;
+}
+
+/* Sea: warm at the horizon, deep teal below */
+.ph-sea {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 26%;
+  background: linear-gradient(to bottom, #c98a64 0%, #1d5a6a 22%, #06202c 65%, #021017 100%);
+}
+
+/* Sun reflection on the water */
+.ph-glimmer {
+  position: absolute;
+  left: 62%;
+  bottom: 0;
+  width: 24vmin;
+  height: 26%;
+  margin-left: -12vmin;
+  background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(255, 205, 140, 0.55), transparent 72%);
+  animation: shimmer 3.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes shimmer {
+  0%, 100% { opacity: 0.55; transform: scaleX(0.9); }
+  50%      { opacity: 0.95; transform: scaleX(1.1); }
+}
+
+/* Layers: scaled from the bottom centre by GSAP */
+.ph-layer {
+  position: absolute;
+  transform-origin: 50% 100%;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.ph-layer--far {
+  left: -20%;
+  bottom: 26%;
+  width: 140%;
+  height: 16%;
+  fill: #0c3548;
+}
+.ph-layer--mid,
+.ph-layer--near { inset: 0; pointer-events: none; }
+
+/* Mist hugging the horizon */
+.ph-mist {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 26%;
+  height: 30%;
+  background: linear-gradient(to top, rgba(255, 214, 170, 0.14), transparent);
+  pointer-events: none;
+}
+
+/* Mid layer: coastlines + boat */
+.shore {
+  position: absolute;
+  bottom: 0;
+  width: clamp(260px, 46vw, 820px);
+  height: auto;
+  fill: #05202b;
+}
+.shore--left  { left: -4%; }
+.shore--right { right: -4%; }
+
+.ph-boat {
+  position: absolute;
+  left: calc(62% - clamp(55px, 7.5vw, 115px));
+  bottom: 11%;
+  width: clamp(110px, 15vw, 230px);
+  height: auto;
+  color: #02080c;
+  fill: currentColor;
+  transform-origin: 50% 100%;
+  animation: bob 6s ease-in-out infinite;
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(-0.6deg); }
+  50%      { transform: translateY(4px) rotate(0.6deg); }
+}
+
+/* Near layer: foreground palms + dune */
+.palm {
+  position: absolute;
+  bottom: -2%;
+  width: clamp(170px, 24vw, 420px);
+  height: auto;
+  color: #02080c;
+  overflow: visible;
+}
+.palm--left  { left: -6%; }
+.palm--right { right: -6%; transform: scaleX(-1); }
+
+.ph-ground {
+  position: absolute;
+  left: -20%;
+  bottom: 0;
+  width: 140%;
+  height: 9%;
+  background: #02080c;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+
+/* Cool blue fireflies instead of warm embers */
+.runway--ph .ember { background: #bfe6ff; }
+
+/* Text */
+.ph__text {
+  position: absolute;
+  top: 20%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  padding: 0 1.5rem;
+  z-index: 5;
+}
+.ph__word {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(1.9rem, 8.2vw, 7.5rem);
+  letter-spacing: 0.3em;
+  padding-left: 0.3em;
+  line-height: 1;
+}
+.ph__sub {
+  margin-top: 1.2rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.1rem, 2.6vw, 2rem);
+  letter-spacing: 0.12em;
+  color: rgba(242, 239, 233, 0.85);
+}
+.js .ph__sub { opacity: 0; }
+
+/* Transition pieces */
+.ph__fade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 8;
+}
+.js .ph__fade { opacity: 1; }   /* starts fully black; GSAP fades it out */
+
+.ph__streak {
+  position: absolute;
+  top: 50%;
+  left: 15%;
+  width: 70%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  z-index: 9;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Pause + low-effects rules */
+.runway--ph:not(.is-live) .ph-glimmer,
+.runway--ph:not(.is-live) .ph-boat,
+.runway--ph:not(.is-live) .ember { animation-play-state: paused; }
+
+.lowfx .ph-mist { display: none; }
+.lowfx .ph-glimmer,
+.lowfx .ph-boat { animation: none; }
+
+@media (max-width: 768px) {
+  .ph__text { top: 16%; }
+  .ph__word { font-size: 9.2vw; letter-spacing: 0.14em; padding-left: 0.14em; }
+  .ph-sun   { bottom: calc(26% - 15vmin); width: 30vmin; height: 30vmin; margin-left: -15vmin; }
+}
+
+/* =========================================================
+   CINEMATIC INDIA → PHILIPPINES TRANSITION
+   ========================================================= */
+
+.story-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255,255,255,0.10) 0%,
+      rgba(0,0,0,0.35) 38%,
+      rgba(0,0,0,0.96) 100%
+    );
+  mix-blend-mode: normal;
+}
+
+.story-transition::before {
+  content: "";
+  position: absolute;
+  width: 160vw;
+  height: 2px;
+  left: -30vw;
+  top: 50%;
+  transform: rotate(-8deg) scaleX(0);
+  transform-origin: center;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.0) 20%,
+    rgba(255,255,255,0.85) 48%,
+    rgba(170,210,255,0.9) 52%,
+    rgba(255,255,255,0.0) 80%,
+    transparent 100%
+  );
+  filter: blur(1px);
+}
+
+.story-transition::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(
+      ellipse at 50% 50%,
+      rgba(130,190,255,0.16),
+      transparent 42%
+    );
+  transform: scale(0.5);
+  opacity: 0;
+}
+
+.story-transition.is-active {
+  opacity: 1;
+}
+
+.story-transition.is-active::before {
+  animation: cinematicLightSweep 1.25s cubic-bezier(.16,1,.3,1) forwards;
+}
+
+.story-transition.is-active::after {
+  animation: cinematicGlow 1.25s ease-out forwards;
+}
+
+@keyframes cinematicLightSweep {
+  0% {
+    transform: rotate(-8deg) scaleX(0);
+    opacity: 0;
+  }
+
+  25% {
+    transform: rotate(-8deg) scaleX(0.35);
+    opacity: 1;
+  }
+
+  55% {
+    transform: rotate(-8deg) scaleX(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: rotate(-8deg) scaleX(1.35);
+    opacity: 0;
+  }
+}
+
+@keyframes cinematicGlow {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  35% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-transition {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .story-transition::before {
+    width: 220vw;
+    left: -60vw;
+  }
+}
+
+
+
+/* =========================================================
+   CINEMATIC EARTH SCENE
+   ========================================================= */
+
+.earth-scene {
+  position: relative;
+  height: 100vh;
+  min-height: 650px;
+  background: #000;
+  overflow: hidden;
+}
+
+#earth-canvas {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  z-index: 1;
+}
+
+.earth-cinematic {
+  position: absolute;
+  inset: 0;
+
+  z-index: 5;
+
+  pointer-events: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.earth-location {
+  position: absolute;
+
+  font-family: Inter, sans-serif;
+
+  font-size: 0.65rem;
+
+  letter-spacing: 0.32em;
+
+  text-transform: uppercase;
+
+  color: rgba(255,255,255,0.72);
+
+  text-shadow:
+    0 2px 20px rgba(0,0,0,0.9);
+
+  opacity: 0;
+}
+
+.earth-location--india {
+  left: 12%;
+  bottom: 25%;
+}
+
+.earth-location--philippines {
+  right: 10%;
+  top: 28%;
+}
+
+.earth-caption {
+  position: absolute;
+
+  bottom: 12%;
+
+  left: 0;
+  right: 0;
+
+  text-align: center;
+
+  font-family:
+    "Cormorant Garamond",
+    serif;
+
+  font-size: clamp(
+    1rem,
+    2vw,
+    1.5rem
+  );
+
+  font-style: italic;
+
+  color: rgba(255,255,255,0.68);
+
+  letter-spacing: 0.08em;
+
+  opacity: 0;
+}
+
+@media (max-width: 700px) {
+
+  .earth-scene {
+    min-height: 550px;
+  }
+
+  .earth-location {
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
+  }
+
+  .earth-location--india {
+    left: 7%;
+    bottom: 20%;
+  }
+
+  .earth-location--philippines {
+    right: 7%;
+    top: 23%;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .earth-scene {
+    height: 100vh;
+  }
+
+}
+
+/* =========================================================
+   FULL CINEMATIC STORY — NO IMAGE LAYERS
+   ========================================================= */
+
+.film-layer {
+  position: relative;
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  background: #050505;
+}
+
+.film-layer::before,
+.film-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.film-layer::before {
+  z-index: -2;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255,255,255,.08), transparent 35%),
+    linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.85));
+  transform: scale(1.15);
+}
+
+.film-layer::after {
+  z-index: -1;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255,255,255,.06) 50%, transparent 100%);
+  transform: translateX(-120%);
+  transition: transform 1.8s cubic-bezier(.2,.7,.2,1);
+}
+
+.film-layer.is-active::after {
+  transform: translateX(120%);
+}
+
+.film-content {
+  width: min(900px, 86vw);
+  text-align: center;
+  transform: translateY(35px);
+  opacity: 0;
+  transition:
+    opacity 1.1s ease,
+    transform 1.2s cubic-bezier(.2,.7,.2,1);
+}
+
+.film-layer.is-active .film-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.film-content span {
+  display: block;
+  margin-bottom: 24px;
+  font-size: 10px;
+  letter-spacing: .4em;
+  opacity: .65;
+}
+
+.film-content h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(42px, 7vw, 100px);
+  line-height: .95;
+  font-weight: 400;
+  letter-spacing: .04em;
+}
+
+.film-content p {
+  max-width: 560px;
+  margin: 30px auto 0;
+  font-size: clamp(14px, 1.4vw, 19px);
+  line-height: 1.8;
+  opacity: .68;
+}
+
+/* Scene atmospheres */
+
+.film-layer--dawn {
+  background:
+    radial-gradient(circle at 50% 75%, rgba(220,150,75,.32), transparent 28%),
+    linear-gradient(180deg, #11131c, #5c3d2d 70%, #0a0909);
+}
+
+.film-layer--home {
+  background:
+    radial-gradient(circle at 30% 40%, rgba(255,210,150,.12), transparent 25%),
+    linear-gradient(135deg, #17120f, #29201a, #070707);
+}
+
+.film-layer--preparation {
+  background:
+    radial-gradient(circle at 70% 40%, rgba(180,120,75,.16), transparent 28%),
+    linear-gradient(120deg, #0c0b0b, #35251d, #090909);
+}
+
+.film-layer--food {
+  background:
+    radial-gradient(circle at 50% 52%, rgba(255,170,75,.28), transparent 17%),
+    linear-gradient(180deg, #130d09, #4a2818, #080606);
+}
+
+.film-layer--street {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255,195,100,.16), transparent 24%),
+    linear-gradient(120deg, #0b1513, #40301f, #080909);
+}
+
+.film-layer--culture {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(210,80,55,.22), transparent 24%),
+    linear-gradient(135deg, #180d0d, #4c251d, #090707);
+}
+
+.film-layer--festival {
+  background:
+    radial-gradient(circle at 30% 35%, rgba(255,120,50,.28), transparent 18%),
+    radial-gradient(circle at 70% 65%, rgba(255,200,80,.2), transparent 20%),
+    #160b0a;
+}
+
+.film-layer--departure {
+  background:
+    radial-gradient(ellipse at 50% 70%, rgba(170,200,220,.14), transparent 25%),
+    linear-gradient(180deg, #090b11, #1b2029, #050608);
+}
+
+.film-layer--flight {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(180,205,235,.18), transparent 28%),
+    linear-gradient(180deg, #050b15, #13253b, #03060b);
+}
+
+.film-layer--arrival {
+  background:
+    radial-gradient(circle at 70% 35%, rgba(255,210,120,.2), transparent 22%),
+    linear-gradient(135deg, #0c1718, #285044, #071010);
+}
+
+.film-layer--philippines {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(80,190,170,.18), transparent 26%),
+    linear-gradient(180deg, #071415, #17433d, #050b0b);
+}
+
+.film-layer--together {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(220,170,110,.2), transparent 28%),
+    linear-gradient(135deg, #19120f, #493126, #0a0807);
+}
+
+.film-layer--future {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,205,135,.22), transparent 30%),
+    linear-gradient(180deg, #08090d, #24202a, #050505);
+}
+
+/* Moving atmospheric elements */
+
+.film-orb,
+.film-glow,
+.film-flight-light,
+.film-steam {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(25px);
+}
+
+.film-orb {
+  width: 30vw;
+  height: 30vw;
+  min-width: 220px;
+  min-height: 220px;
+  background: rgba(255,190,90,.12);
+  animation: filmOrb 12s ease-in-out infinite alternate;
+}
+
+.film-glow {
+  width: 35vw;
+  height: 35vw;
+  background: rgba(255,130,55,.12);
+  animation: filmOrb 9s ease-in-out infinite alternate-reverse;
+}
+
+.film-flight-light {
+  width: 120vw;
+  height: 10vh;
+  border-radius: 0;
+  background: linear-gradient(90deg, transparent, rgba(220,240,255,.12), transparent);
+  transform: rotate(-12deg) translateX(-80%);
+  animation: flightLight 8s ease-in-out infinite;
+}
+
+.film-steam {
+  width: 30vw;
+  height: 55vh;
+  background: rgba(255,230,190,.08);
+  animation: steamMove 7s ease-in-out infinite alternate;
+}
+
+@keyframes filmOrb {
+  from { transform: translate(-18vw, -5vh) scale(.8); }
+  to   { transform: translate(18vw, 8vh) scale(1.25); }
+}
+
+@keyframes flightLight {
+  0%, 25% { transform: rotate(-12deg) translateX(-100%); }
+  70%, 100% { transform: rotate(-12deg) translateX(100%); }
+}
+
+@keyframes steamMove {
+  from { transform: translateY(8vh) scale(.8); opacity: .25; }
+  to   { transform: translateY(-12vh) scale(1.25); opacity: .65; }
+}
+
+@media (max-width: 700px) {
+  .film-content h2 {
+    font-size: clamp(40px, 12vw, 70px);
+  }
+
+  .film-content span {
+    letter-spacing: .25em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-orb,
+  .film-glow,
+  .film-flight-light,
+  .film-steam {
+    animation: none;
+  }
+}
+
+/* =========================================================
+   CINEMATIC TRANSITIONS — DEEP CROSSFADE
+   ========================================================= */
+
+.film-layer {
+  will-change: transform, opacity, filter;
+  transform-origin: center center;
+  transition: none;
+}
+
+.film-layer::before {
+  transition: opacity .8s ease;
+}
+
+.film-layer::after {
+  width: 70%;
+  left: -80%;
+  transform: skewX(-22deg);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0) 25%,
+      rgba(255,255,255,.12) 50%,
+      rgba(255,255,255,0) 75%,
+      transparent 100%
+    );
+  filter: blur(12px);
+  opacity: 0;
+}
+
+.film-layer.is-active::after {
+  animation: cinematicSweep 2.2s cubic-bezier(.16,.8,.24,1) forwards;
+}
+
+@keyframes cinematicSweep {
+  0% {
+    left: -80%;
+    opacity: 0;
+  }
+
+  18% {
+    opacity: .8;
+  }
+
+  55% {
+    opacity: .35;
+  }
+
+  100% {
+    left: 120%;
+    opacity: 0;
+  }
+}
+
+/* Darkness that makes scene changes feel like cuts in a film */
+.film-transition-black {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0,0,0,0) 20%,
+      rgba(0,0,0,.45) 72%,
+      rgba(0,0,0,.92) 100%
+    );
+  opacity: .35;
+  mix-blend-mode: multiply;
+}
+
+/* Fine cinematic grain */
+.film-transition-grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: .075;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+  animation: filmGrain .18s steps(2) infinite;
+}
+
+@keyframes filmGrain {
+  0%   { transform: translate(0,0); }
+  25%  { transform: translate(2%, -1%); }
+  50%  { transform: translate(-1%, 2%); }
+  75%  { transform: translate(1%, 1%); }
+  100% { transform: translate(-2%, -1%); }
+}
+
+/* Subtle letterbox during transitions */
+.film-layer::marker {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-transition-grain {
+    animation: none;
+  }
+
+  .film-layer.is-active::after {
+    animation: none;
+  }
+}
+
+/* Final transition tuning */
+.film-transition-black {
+  opacity: .12 !important;
+}
+
+.film-transition-grain {
+  opacity: .035 !important;
+}
+
+.film-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.film-layer.is-active::after {
+  animation-duration: 3.2s;
+  opacity: .35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-transition-grain {
+    opacity: 0 !important;
+  }
+}
+
+/* =========================================================
+   FILM LAYERS
+   Same depth language as the India / Philippines scenes.
+   ========================================================= */
+
+.film-layer {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+.film-depth {
+  position: absolute;
+  inset: -8%;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.film-depth__far,
+.film-depth__mid,
+.film-depth__near {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.film-depth__far {
+  background:
+    radial-gradient(
+      ellipse at 50% 30%,
+      rgba(255,255,255,.025),
+      transparent 42%
+    );
+  opacity: .9;
+}
+
+.film-depth__mid {
+  background:
+    radial-gradient(
+      ellipse at 30% 70%,
+      rgba(255,255,255,.035),
+      transparent 35%
+    ),
+    radial-gradient(
+      ellipse at 75% 30%,
+      rgba(0,0,0,.12),
+      transparent 42%
+    );
+  opacity: .8;
+}
+
+.film-depth__near {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,0,0,.16),
+      transparent 28%,
+      transparent 72%,
+      rgba(0,0,0,.16)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.10),
+      transparent 35%,
+      rgba(0,0,0,.20)
+    );
+  opacity: .75;
+}
+
+.film-content {
+  position: relative;
+  z-index: 5;
+  transform: translateZ(0);
+}
+
+@media (max-width: 700px) {
+  .film-depth {
+    inset: -4%;
+  }
+
+  .film-depth__near {
+    opacity: .55;
+  }
+}

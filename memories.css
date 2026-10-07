@@ -1,0 +1,30 @@
+#memories { padding: 80px 5vw; text-align: center; background: #12060d; color: #fff; }
+#memories h2 { font-size: clamp(2rem, 5vw, 3.2rem); margin-bottom: 6px; }
+.mem-sub { opacity: .7; margin-bottom: 28px; }
+
+.mem-tabs { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; }
+.mem-tabs button {
+  padding: 8px 18px; border-radius: 999px; border: 1px solid #ff6b9d;
+  background: transparent; color: #ff6b9d; cursor: pointer; text-transform: capitalize; transition: .2s;
+}
+.mem-tabs button.active, .mem-tabs button:hover { background: #ff6b9d; color: #fff; }
+
+.mem-grid { columns: 3 220px; column-gap: 14px; max-width: 1100px; margin: 0 auto; }
+.mem-grid img {
+  width: 100%; margin-bottom: 14px; border-radius: 12px; cursor: pointer; display: block;
+  opacity: 0; transform: translateY(20px); transition: opacity .6s, transform .6s;
+}
+.mem-grid img.show { opacity: 1; transform: none; }
+.mem-grid img:hover { transform: scale(1.03); }
+
+.mem-lightbox {
+  position: fixed; inset: 0; background: rgba(0,0,0,.92); display: none;
+  align-items: center; justify-content: center; z-index: 9999;
+}
+.mem-lightbox.open { display: flex; }
+.mem-lightbox img { max-width: 90vw; max-height: 88vh; border-radius: 10px; }
+.mem-close, .mem-nav {
+  position: absolute; background: none; border: none; color: #fff; cursor: pointer; font-size: 2.2rem;
+}
+.mem-close { top: 18px; right: 28px; font-size: 3rem; }
+.mem-nav.prev { left: 20px; } .mem-nav.next { right: 20px; }
