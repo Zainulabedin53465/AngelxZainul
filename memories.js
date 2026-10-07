@@ -14,7 +14,8 @@
     list.forEach((src, i) => {
       const img = document.createElement("img");
       img.src = encodeURI(src);
-      img.loading = "lazy";
+      img.loading = i < 9 ? "eager" : "lazy";
+      img.decoding = "async";
       img.onload = () => img.classList.add("show");
       img.onclick = () => open(i);
       grid.appendChild(img);
@@ -46,6 +47,11 @@
     if (e.key === "ArrowLeft") step(-1);
     if (e.key === "ArrowRight") step(1);
   });
+
+  // start downloading every photo in the background once the page has loaded
+  const warm = () => all.forEach(src => { const im = new Image(); im.decoding = "async"; im.src = encodeURI(src); });
+  if (document.readyState === "complete") setTimeout(warm, 500);
+  else window.addEventListener("load", () => setTimeout(warm, 500));
 
   show(all);
 })();

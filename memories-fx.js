@@ -26,7 +26,7 @@
     cine.classList.add("on");
     await wait(50);
     cine.classList.add("closed");          // bars close, title fades in
-    await wait(2800);                       // hold the title card
+    await wait(1600);                       // hold the title card
     cine.classList.add("opening");          // title out
     cine.classList.remove("closed");        // bars open
     section.classList.add("revealed");      // photos start focusing in

@@ -48,6 +48,25 @@
       top:'#02030a', bot:'#b88a4a', far:'#1a1a2a', fs:'hills', mid:'', ms:'', near:'#05050a',
       ox:50, oy:64, oc:'255,200,122', g:'✦', gc:'#ffe1aa', dir:'up' }
   ];
+
+  /* ---------- YOUR STORY (edit the words here) ---------- */
+  const MSG = [
+    { l: "CHAPTER I \u00b7 2019", h: "It began in 2019", d: "Two strangers. Two worlds. No plan.", s: "Then Angel appeared, and the morning felt different." },
+    { l: "THE FIRST DAYS", h: "She chose him", d: "He never believed he was worth choosing.", s: "She saw what he could not see in himself." },
+    { l: "EVERY DAY", h: "Always by his side", d: "On the days he had nothing to give,", s: "Angel stayed, and asked for nothing in return." },
+    { l: "GRATITUDE", h: "He sees it. He appreciates it.", d: "Quiet sacrifices he noticed too late.", s: "Now he notices every single one." },
+    { l: "THE QUESTION", h: "How does she love him?", d: "A girl this beautiful, this kind. Why him?", s: "He still does not know. He is grateful anyway." },
+    { l: "HIS WORST NIGHTS", h: "The dark he brought", d: "There were times he doubted, pulled away, and nearly betrayed her trust.", s: "She could have left. She chose to understand." },
+    { l: "HER GRACE", h: "She held on", d: "Where others would have walked away,", s: "Angel held him, and he found a way to begin again." },
+    { l: "THE LESSON", h: "What he learned", d: "Love is not proven when it is easy.", s: "It is proven when someone stays through the dark." },
+    { l: "THE DISTANCE", h: "India and the Philippines", d: "Thousands of kilometres of night between them.", s: "Every message was a sunrise." },
+    { l: "THE PROMISE", h: "He promises", d: "He knows his mistakes. He does not hide from them.", s: "He chooses her, honestly, every single morning." },
+    { l: "HER STRENGTH", h: "Her heart", d: "She carried more than she ever said.", s: "It is the brightest place he knows." },
+    { l: "CHAPTER II", h: "Two worlds become one", d: "Through every dark night,", s: "they found the same morning." },
+    { l: "THE NEXT CHAPTER", h: "Our story continues", d: "There will be hard nights again.", s: "And there will always be a morning with you." }
+  ];
+  CH.forEach((c, i) => Object.assign(c, MSG[i] || {}));
+
   const N = CH.length;
   const mobile = matchMedia('(max-width: 768px), (pointer: coarse)').matches;
   const rnd = (a, b) => a + Math.random() * (b - a);
@@ -72,12 +91,12 @@
     return `<div class="ch-bg" style="background:${grad};--gc:${c.gc}">
       <div class="ch-orb" style="left:${c.ox}%;top:${c.oy}%;background:radial-gradient(circle,rgba(${c.oc},.85) 0%,rgba(${c.oc},.25) 38%,rgba(${c.oc},0) 68%)"></div>
       ${lay('far', c.far, c.fs)}${lay('mid', c.mid, c.ms)}${lay('near', c.near, 'ground')}
-      <div class="ch-fx">${fx(c)}</div>
+      <div class="ch-fx">${fx(c)}</div><div class="ch-night"></div>
     </div>`;
   }).join('');
 
   const txHTML = CH.map(c =>
-    `<div class="ch-t"><span class="ch-l">${c.l}</span><h2 class="ch-h">${c.h}</h2><p class="ch-s">${c.s}</p></div>`
+    `<div class="ch-t"><span class="ch-l">${c.l}</span><h2 class="ch-h">${c.h}</h2><div class="ch-two"><p class="ch-d">${c.d}</p><p class="ch-s">${c.s}</p></div></div>`
   ).join('');
 
   const sec = document.createElement('section');
@@ -96,6 +115,9 @@
   const fars = bgs.map(b => b.querySelector('.ch-lay.far'));
   const mids = bgs.map(b => b.querySelector('.ch-lay.mid'));
   const nears = bgs.map(b => b.querySelector('.ch-lay.near'));
+  const nights = bgs.map(b => b.querySelector('.ch-night'));
+  const darks = txs.map(t => t.querySelector('.ch-d'));
+  const morns = txs.map(t => t.querySelector('.ch-s'));
   const cacheBg = new Array(N).fill(-1);
   const cacheTx = new Array(N).fill(-1);
 
@@ -131,6 +153,8 @@
         if (fars[i])  fars[i].style.transform  = `translate3d(${(-s * 2).toFixed(2)}%,0,0)`;
         if (mids[i])  mids[i].style.transform  = `translate3d(${(-s * 4).toFixed(2)}%,0,0)`;
         if (nears[i]) nears[i].style.transform = `translate3d(${(-s * 6).toFixed(2)}%,0,0)`;
+        const nt = s < -0.4 ? 0.62 : s < 0.1 ? 0.62 * (1 - (s + 0.4) / 0.5) : 0.35 * Math.min(1, (s - 0.1) / 0.4);
+        nights[i].style.opacity = nt.toFixed(3);
       }
 
       const t = d < 0.3 ? 1 : d < 0.5 ? 1 - (d - 0.3) / 0.2 : 0;
@@ -139,6 +163,9 @@
         cacheTx[i] = key;
         txs[i].style.opacity = t;
         txs[i].style.transform = `translate3d(0,${((c - pos) * 90).toFixed(1)}px,0)`;
+        const sd = pos - c;
+        darks[i].style.opacity = clamp((0.05 - sd) / 0.15);
+        morns[i].style.opacity = clamp((sd + 0.1) / 0.15);
       }
     }
   }
