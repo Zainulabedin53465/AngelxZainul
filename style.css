@@ -1339,3 +1339,12 @@ html.lenis, html.lenis body { height: auto; }
     opacity: .55;
   }
 }
+
+/* ---- mobile performance fixes ---- */
+@media (max-width: 768px) {
+  .overlay--grain { display: none; }
+  #story .film-steam, #story .fp-wisp, #story .fp-cloud,
+  #story .fp-beam, #story .fp-orb, #story .fp-merge,
+  #story .fp-g--powder i, #story .film-glow { filter: none !important; mix-blend-mode: normal !important; }
+  .mem-bg .nebula { filter: none; }
+}

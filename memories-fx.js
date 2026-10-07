@@ -37,5 +37,5 @@
 
   new IntersectionObserver((entries, obs) => {
     if (entries[0].isIntersecting) { obs.disconnect(); play(); }
-  }, { threshold: 0.25 }).observe(section);
+  }, { threshold: 0, rootMargin: '0px 0px -40% 0px' }).observe(section);
 })();

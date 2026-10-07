@@ -126,8 +126,8 @@
       if (fpsEl) fpsEl.textContent = Math.round(fps) + ' fps' + (low ? ' | low fx' : '');
 
       if (!document.hidden && !low) {
-        slowSeconds = fps < 40 ? slowSeconds + 1 : 0;
-        if (slowSeconds >= 3) {
+        slowSeconds = fps < 22 ? slowSeconds + 1 : 0;
+        if (slowSeconds >= 6) {
           root.classList.add('lowfx');
           console.log('[story] low FPS detected, switching to low-effects mode');
         }
@@ -147,7 +147,7 @@
     gsap.config({ force3D: true });
     ScrollTrigger.config({ ignoreMobileResize: true });
 
-    if (!hasLenis || reduceMotion) return;
+    if (!hasLenis || reduceMotion || isMobile) return;
 
     lenis = new Lenis({ lerp: 0.085, smoothWheel: true, syncTouch: false });
 
