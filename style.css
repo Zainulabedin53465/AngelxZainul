@@ -1348,3 +1348,19 @@ html.lenis, html.lenis body { height: auto; }
   #story .fp-g--powder i, #story .film-glow { filter: none !important; mix-blend-mode: normal !important; }
   .mem-bg .nebula { filter: none; }
 }
+
+/* ---- fix: film chapters dark / invisible text ---- */
+#story .film-layer { will-change: auto; }
+#story .film-layer::before,
+#story .film-layer::after { content: none; display: none; }
+#story .film-content { opacity: 1; transform: none; transition: none; }
+
+/* ---- lighter effects on any touch device (also desktop mode) ---- */
+@media (max-width: 768px), (pointer: coarse) {
+  .overlay--grain { display: none; }
+  #story .film-steam, #story .fp-wisp, #story .fp-cloud,
+  #story .fp-beam, #story .fp-orb, #story .fp-merge,
+  #story .fp-g--powder i, #story .film-glow { filter: none !important; }
+  #story .fp-orb, #story .fp-merge, #story .film-glow, #story .fp-g--powder i { mix-blend-mode: screen; }
+  .mem-bg .nebula { filter: none; }
+}
