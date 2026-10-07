@@ -1,0 +1,80 @@
+/* ===== chapters.css: India -> Philippines -> story chapters ===== */
+:root { --stage-h: 100vh; --u: 1vh; --ch-slice: 130; }
+@supports (height: 100svh) { :root { --stage-h: 100svh; --u: 1svh; } }
+@media (max-width: 768px), (pointer: coarse) { :root { --ch-slice: 105; } }
+
+#chapters {
+  position: relative;
+  height: calc(var(--u) * (var(--ch-slice) * var(--ch-n, 13) + 100));
+  background: #000;
+  pointer-events: none;
+}
+#chapters .ch-stage {
+  position: sticky; top: 0;
+  height: var(--stage-h);
+  overflow: hidden; isolation: isolate;
+  background: #000; opacity: 0;
+}
+#chapters .ch-bg { position: absolute; inset: 0; opacity: 0; visibility: hidden; }
+#chapters .ch-bg.off * { animation-play-state: paused; }
+
+#chapters .ch-orb {
+  position: absolute; width: 70vmin; height: 70vmin;
+  margin: -35vmin 0 0 -35vmin; border-radius: 50%; opacity: .6;
+  will-change: transform;
+}
+#chapters .ch-lay { position: absolute; left: -10%; width: 120%; bottom: 0; will-change: transform; }
+#chapters .ch-lay.far  { height: 56%; }
+#chapters .ch-lay.mid  { height: 44%; }
+#chapters .ch-lay.near { height: 26%; }
+
+/* silhouette shapes */
+.s-hills   { clip-path: polygon(0 100%,0 62%,10% 50%,22% 58%,36% 38%,50% 54%,63% 34%,78% 52%,90% 42%,100% 50%,100% 100%); }
+.s-ground  { clip-path: polygon(0 100%,0 64%,18% 56%,40% 63%,62% 52%,82% 60%,100% 54%,100% 100%); }
+.s-waves   { clip-path: polygon(0 100%,0 40%,8% 30%,16% 42%,24% 30%,32% 42%,40% 30%,48% 42%,56% 30%,64% 42%,72% 30%,80% 42%,88% 30%,96% 42%,100% 36%,100% 100%); }
+.s-skyline { clip-path: polygon(0 100%,0 58%,5% 58%,5% 36%,11% 36%,11% 62%,17% 62%,17% 24%,23% 24%,23% 50%,29% 50%,29% 40%,36% 40%,36% 66%,43% 66%,43% 30%,49% 30%,49% 56%,57% 56%,57% 18%,63% 18%,63% 48%,71% 48%,71% 38%,78% 38%,78% 62%,85% 62%,85% 28%,92% 28%,92% 52%,100% 52%,100% 100%); }
+.s-houses  { clip-path: polygon(0 100%,0 70%,6% 70%,10% 52%,14% 70%,22% 70%,22% 62%,32% 62%,36% 44%,40% 62%,46% 62%,46% 70%,58% 70%,62% 50%,66% 70%,76% 70%,76% 60%,86% 60%,90% 42%,94% 60%,100% 60%,100% 100%); }
+.s-towers  { clip-path: polygon(0 100%,0 70%,8% 70%,11% 28%,14% 70%,30% 70%,30% 55%,36% 55%,36% 70%,52% 70%,56% 8%,60% 70%,76% 70%,76% 55%,82% 55%,82% 70%,90% 70%,93% 28%,96% 70%,100% 70%,100% 100%); }
+
+/* floating particles (pure CSS) */
+#chapters .ch-fx { position: absolute; inset: 0; overflow: hidden; }
+#chapters .ch-p {
+  position: absolute; font-style: normal; line-height: 1;
+  font-size: var(--s); color: var(--gc); opacity: 0;
+  will-change: transform;
+}
+#chapters .ch-p.up { bottom: -6%; animation: chUp var(--dur) linear infinite; }
+#chapters .ch-p.dn { top: -6%;    animation: chDn var(--dur) linear infinite; }
+@keyframes chUp {
+  0% { transform: translate3d(0,0,0); opacity: 0; }
+  15% { opacity: .9; } 85% { opacity: .6; }
+  100% { transform: translate3d(var(--dx),-108vh,0); opacity: 0; }
+}
+@keyframes chDn {
+  0% { transform: translate3d(0,0,0) rotate(0); opacity: 0; }
+  12% { opacity: .9; }
+  100% { transform: translate3d(var(--dx),108vh,0) rotate(300deg); opacity: 0; }
+}
+
+/* text */
+#chapters .ch-t {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 0 7vw; opacity: 0; will-change: opacity, transform;
+}
+#chapters .ch-l {
+  display: block; margin: 0 0 1.4rem;
+  font: 500 .75rem/1 'Inter', sans-serif; letter-spacing: .42em; padding-left: .42em;
+  text-transform: uppercase; color: #c9a45c;
+}
+#chapters .ch-h {
+  margin: 0 0 1.3rem;
+  font: 300 clamp(2.4rem, 8vw, 6.5rem)/1.05 'Cormorant Garamond', Georgia, serif;
+  color: #f6efe4; text-shadow: 0 2px 30px rgba(0,0,0,.55);
+}
+#chapters .ch-s {
+  margin: 0; max-width: 34ch;
+  font: 300 clamp(1rem, 1.6vw, 1.3rem)/1.6 'Inter', sans-serif;
+  color: rgba(246,239,228,.85); text-shadow: 0 1px 16px rgba(0,0,0,.6);
+}
+@media (prefers-reduced-motion: reduce) { #chapters .ch-p { display: none; } }
